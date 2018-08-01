@@ -1,0 +1,28 @@
+close all
+figure;
+%%%Load Online scoring results
+load('sleepstage.mat');
+%%%Load Offline scoring results
+load('SleepScoring_OBGamma.mat');
+allresult(:,2)=ceil(allresult(:,2)/20000);
+
+%Time comparison
+%% Create offline Hypnogram
+TotRecordingTimeOffline=round(tot_length(union(REMEpoch,SWSEpoch,Wake))/10^4);
+
+offlineHypnogram=zeros(TotRecordingTimeOffline,1);
+wakeTimes=[floor(Start(Wake)/10^4) ceil(End(Wake)/10^4)]+1;
+for i=1:size(wakeTimes,1)
+    offlineHypnogram(wakeTimes(i,1):wakeTimes(i,2))=3;
+end
+REMTimes=[floor(Start(REMEpoch)/10^4) ceil(End(REMEpoch)/10^4)]+1;
+for i=1:size(REMTimes,1)
+    offlineHypnogram(REMTimes(i,1):REMTimes(i,2))=2;
+end
+SWSTimes=[floor(Start(SWSEpoch)/10^4) ceil(End(SWSEpoch)/10^4)]+1;
+for i=1:size(SWSTimes,1)
+    offlineHypnogram(SWSTimes(i,1):SWSTimes(i,2))=1;
+end
+
+X=allresult(:,3:6);
+Y=offlineHypnogram(allresult(:,2));

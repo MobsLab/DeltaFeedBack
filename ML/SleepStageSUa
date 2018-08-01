@@ -1,0 +1,54 @@
+clear all
+load('/home/mobsmorty/Dropbox/DataKJ/Mobs/Delta_Data/Datasets/DatasetSubstageFromSUA.mat')
+
+test_train = 'random';
+
+
+%% 
+if strcmpi(test_train,'random')
+    X = cell(0);
+    Y = [];
+    for p=1:length(data_csfs.X)
+        Xtemp=data_csfs.X{p};
+        Ytemp=data_csfs.Y{p};
+        X_down={};
+        Y_down=[];
+        for i=1:length(Xtemp)
+            X_down={X_down X_temp};
+            Y_down=[Y_down Y_temp];
+        end
+        X = [X X_down];
+        Y = [Y Y_down];
+    end
+
+    %data
+    Y = categorical(Y');
+
+    %train and validation
+    idx = false(length(X), 1);
+    idx(randperm(numel(idx), floor(0.2*length(X)))) = true; % validation = 20% of the dataset  
+
+    X_train = X(~idx);
+    X_test = X(idx);
+    Y_train = Y(~idx);
+    Y_test = Y(idx);
+
+elseif strcmpi(test_train,'mouse')
+    X_train = cell(0);
+    Y_train = [];
+    for p=1
+        X_train = [X_train data_cstu.X2{p}];
+        Y_train = [Y_train data_cstu.Y{p}];
+    end
+    
+    X_test = cell(0);
+    Y_test = [];
+    for p=2
+        X_test = [X_test data_cstu.X2{p}];
+        Y_test = [Y_test data_cstu.Y{p}];
+    end
+    
+    Y_train = categorical(Y_train');
+    Y_test = categorical(Y_test');
+    
+end

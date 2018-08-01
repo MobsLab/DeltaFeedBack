@@ -1,0 +1,133 @@
+
+% ClassifyTonesInUpEffect
+% 05.06.2018 KJ
+%
+% Try to predict the effect of a tones with the preceding MUA
+%   - create a dataset
+%   - create a LSTM model
+% 
+%   see 
+%       CreateDatasetTonesInUpEffect ClassifySubstageFromSUA
+%
+
+
+
+%% init
+
+%load
+clear
+load('/home/mobsmorty/Dropbox/DataKJ/Mobs/Delta_Data/Datasets/CreateDatasetTonesInUpEffect.mat')
+
+test_train = 'random';
+
+
+%% 
+if strcmpi(test_train,'random')
+    X = cell(0);
+    Y = [];
+    for p=1:length(data_cstu.X2)
+        Xtemp=data_cstu.X2{p};
+        Ytemp=data_cstu.Y{p};
+        X_down={};
+        Y_down=[];
+        for i=1:length(Xtemp)
+            transformWave=abs(cwt((downsample((Xtemp{i}(2,:)-Xtemp{i}(1,:))',5)')));
+            X_down={X_down{:} imresize(ind2rgb(uint8(transformWave),jet(450)),[224 224])};
+            Y_down=[Y_down(:)' Ytemp(i)];
+        end
+        X = [X X_down];
+        Y = [Y Y_down];
+    end
+
+    %data
+    Y = categorical(Y');
+
+    %train and validation
+    idx = false(length(X), 1);
+    idx(randperm(numel(idx), floor(0.2*length(X)))) = true; % validation = 20% of the dataset  
+
+    X_train = X(~idx);
+    X_test = X(idx);
+    Y_train = Y(~idx);
+    Y_test = Y(idx);
+
+elseif strcmpi(test_train,'mouse')
+    X_train = cell(0);
+    Y_train = [];
+    for p=1
+        X_train = [X_train data_cstu.X2{p}];
+        Y_train = [Y_train data_cstu.Y{p}];
+    end
+    
+    X_test = cell(0);
+    Y_test = [];
+    for p=2
+        X_test = [X_test data_cstu.X2{p}];
+        Y_test = [Y_test data_cstu.Y{p}];
+    end
+    
+    Y_train = categorical(Y_train');
+    Y_test = categorical(Y_test');
+    
+end
+% %% LSTM
+% 
+% %model
+% inputSize = size(X_train{1},1);
+% outputSize = 40;
+% numHiddenUnits1=150;
+% numHiddenUnits2=100;
+% outputMode = 'last';
+% numClasses = 2;
+% 
+% layers = [sequenceInputLayer(inputSize)
+%     lstmLayer(128,'OutputMode','last')
+%     lstmLayer(64,'OutputMode','last')
+%     fullyConnectedLayer(numClasses)
+%     softmaxLayer
+%     classificationLayer];
+%training
+% maxEpochs = 15;
+% miniBatchSize = 50;
+% 
+% options = trainingOptions('sgdm', ...
+%     'MaxEpochs',maxEpochs, ...
+%     'MiniBatchSize',miniBatchSize, ...
+%     'Verbose',0, ...
+%     'InitialLearnRate',1E-7,'Plots','training-progress','ExecutionEnvironment','gpu');
+% 
+
+%% CNN
+alex = alexnet;
+layers = alex.Layers;
+layers(23) = fullyConnectedLayer(3);
+layers(25) = classificationLayer;
+
+inputSize = alex.Layers(1).InputSize;
+aug = imageDataAugmenter
+augimgsTrain = augmentedImageSource(inputSize(1:2),cell2table(X_train),Y_train);
+augimgsValidation = augmentedImageSource(inputSize(1:2),cell2table(X_test),Y_test);
+rng default
+mbSize = 10;
+mxEpochs = 10;
+ilr = 1e-4;
+plt = 'training-progress';
+
+opts = trainingOptions('sgdm',...
+    'InitialLearnRate',ilr, ...
+    'MaxEpochs',mxEpochs ,...
+    'MiniBatchSize',mbSize, ...
+    'ValidationData',{,...
+    'ExecutionEnvironment','cpu',...
+    'Plots',plt);
+
+net = trainNetwork(augimgsTrain,layers,opts);
+
+
+%test
+Yfit = classify(net, X_test);
+CP = classperf(grp2idx(Y_test), grp2idx(Yfit));
+conf_matrix = CP.CountingMatrix(1:end-1,:);
+CP.CountingMatrix(1:end-1,:)
+conf_matrix./sum(conf_matrix,1)
+

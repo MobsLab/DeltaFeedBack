@@ -1,0 +1,106 @@
+clear all
+load('/home/mobsmorty/Dropbox/DataKJ/Mobs/Delta_Data/Datasets/DatasetSubstageFromSUA.mat')
+
+test_train = 'random';
+
+
+%% 
+if strcmpi(test_train,'random')
+    X = cell(0);
+    Y = [];
+    for p=1:length(data_csfs.X)
+        Xtemp=data_csfs.X{p};
+        Ytemp=data_csfs.Y{p};
+        X_down=[];
+        Y_down=[];
+        for i=1:length(Xtemp)
+            X_down=[X_down; {Xtemp{i}}];
+            Y_down=[Y_down(:); Ytemp(i)];
+        end
+        X = [X(:); X_down];
+        Y = [Y(:); Y_down];
+    end
+
+    %data
+    Y = categorical(Y');
+
+    %train and validation
+    idx = false(length(X), 1);
+    idx(randperm(numel(idx), floor(0.2*length(X)))) = true; % validation = 20% of the dataset  
+
+    X_train = X(~idx);
+    X_test = X(idx);
+    Y_train = Y(~idx);
+    Y_test = Y(idx);
+
+elseif strcmpi(test_train,'mouse')
+    X_train = cell(0);
+    Y_train = [];
+    for p=1
+        X_train = [X_train data_cstu.X2{p}];
+        Y_train = [Y_train data_cstu.Y{p}];
+    end
+    
+    X_test = cell(0);
+    Y_test = [];
+    for p=2
+        X_test = [X_test data_cstu.X2{p}];
+        Y_test = [Y_test data_cstu.Y{p}];
+    end
+    
+    Y_train = categorical(Y_train');
+    Y_test = categorical(Y_test');
+    
+end
+img1=zeros(size(X{1}));
+img2=zeros(size(X{1}));
+img3=zeros(size(X{1}));
+img4=zeros(size(X{1}));
+img5=zeros(size(X{1}));
+% img1=[];
+% img2=[];
+% img3=[];
+% img4=[];
+% img5=[];
+neur1=[];
+neur2=[];
+neur3=[];
+neur4=[];
+neur5=[];
+for i=1:length(X)
+    if Y(i)=='1'
+        img1=img1 +X{i};
+        neur1=[neur1 sum(X{i}(5,:))];
+    elseif Y(i)=='2'
+        img2=img2 +X{i};
+        neur2=[neur2 sum(X{i}(5,:))];
+    elseif Y(i)=='3'
+        img3=img3 +X{i};
+        neur3=[neur3 sum(X{i}(5,:))];
+    elseif Y(i)=='4'
+        img4=img4 +X{i};
+        neur4=[neur4 sum(X{i}(5,:))];
+    elseif Y(i)=='5'
+        img5=img5 +X{i};
+        neur5=[neur5 sum(X{i}(5,:))];
+    end
+end
+imgTable={[img1] [img2] [img3] [img4] [img5]};
+figure
+imgT=[];
+for i=1:5
+    subplot(1,5,i)
+    imshow(imgTable{i}/1200);
+    axis image
+    imgT=[imgT; sum(imgTable{i}(5,:),1)];
+end
+figure
+imagesc(sum(imgT,2))
+figure
+hist(neur1)
+hold
+
+    
+    
+    
+    

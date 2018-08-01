@@ -1,0 +1,5 @@
+fileinfo = dir('digitalout.dat');
+num_samples = fileinfo.bytes/2; % uint16 = 2 bytes
+fid = fopen('digitalout.dat', 'r');
+digital_word = fread(fid, num_samples, 'uint16');
+fclose(fid);
