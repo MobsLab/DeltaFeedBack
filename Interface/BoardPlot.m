@@ -494,6 +494,9 @@ classdef BoardPlot < handle
              sleep=sleepstage(timestamps<obj.maxSleepstages & timestamps>(obj.maxSleepstages-3600));
              time=time(sleep>0);
              sleep=sleep(sleep>0);
+             if (obj.maxSleepstages-3600)>0
+                set(obj.SleepStageAxes,'XLim',obj.maxSleepstages-3600)
+             end
              if length(sleep)>1
                 drawHypnogram(obj.SleepStageLines(1),obj.SleepStageAxes,obj.SleepStagePatches,time,sleep);
              end
