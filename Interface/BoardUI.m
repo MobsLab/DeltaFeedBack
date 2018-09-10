@@ -215,18 +215,35 @@ classdef BoardUI < handle
                 writetable(paramsArray,obj.paramsFile,'Delimiter',';');
             end
         end
-        function obj=setChannelsSpectre(obj, file) %
+        function obj=setChannelsSpectre(obj, filename) %
             %% Get the mouse channels from a .csv file and use the data: Important to keep the same order for the parameters
-            paramsArray=readtable(file,'Delimiter',';','Format', '%s%f');
-            obj.paramsFile=file;
-            obj.set_thechannels([paramsArray{5,2}+1 paramsArray{4,2}+1]);
+            obj.paramsFile = filename;
+            paramsArray=readtable(filename,'Delimiter',';','Format', '%s%f');
+            params_key = table2array(paramsArray(:,1));
+            params_value = table2array(paramsArray(:,2));
+            
+            %PFC channels
+            pfc_deep = params_value(strcmpi(params_key,'pfc deep')) + 1;
+            pfc_sup = params_value(strcmpi(params_key,'pfc sup')) + 1;
+            
+            obj.set_thechannels([pfc_deep pfc_sup]);
             obj.set_channels();
-            obj.Plot.bullchannel=paramsArray{1,2}+1;
-            obj.Plot.Deltachannel=paramsArray{2,2}+1;
-            obj.Plot.Thetachannel=paramsArray{3,2}+1;
-            obj.set_thethreshold(paramsArray{6,2},paramsArray{7,2});
+            
+            %Bulb channel
+            obj.Plot.bullchannel = params_value(strcmpi(params_key,'bulb')) + 1;            
+            %HPC channels
+            obj.Plot.Deltachannel = params_value(strcmpi(params_key,'delta')) + 1;
+            obj.Plot.Thetachannel = params_value(strcmpi(params_key,'theta')) + 1;
+            
+            %thresholds
+            gamma_thresh = params_value(strcmpi(params_key,'gamma'));
+            ratio_thresh = params_value(strcmpi(params_key,'ratio'));
+            obj.set_thethreshold(gamma_thresh,ratio_thresh);
             
         end
+        
+        
+        
         function obj=setDigitalOutput(obj, value)
             %% Set intan digital output to indicate sleepstate
             obj.Board.DigitalOutputs(9:end)=0;
