@@ -112,12 +112,12 @@ classdef BoardPlot < handle
         ThetaData
         DeltaData
         DeltaPFCData
-        %Stimulate during NREM Sleep
+        
+        %Stimulate during Sleep stage or randomly
         stimulateDuringNREM
-        
         stimulateDuringREM
-        
         stimulateDuringWake
+        stimulateDuringWakeTheta
         stimulateAtRandom
         
         % Data plot axes (Axes type)
@@ -131,6 +131,7 @@ classdef BoardPlot < handle
         timerNREM %Timer for last epoch of NREM
         timerREM
         timerWake
+        timerWakeTheta
         
         snakeSize %Size of the snake
         recordingTime %Total recording time
@@ -147,6 +148,7 @@ classdef BoardPlot < handle
 
         
         SleepState %SleepState At the moment
+        WakeTheta %Boolean - active wake period with theta
         
         % We'll implement a circular queue of data in Amplifiers; 
         % this is the index where we should store the next datablock
@@ -166,6 +168,7 @@ classdef BoardPlot < handle
         probREM
         probNREM
         probWake
+        progWakeTheta
         PhaseSpaceAxes
     end
     
@@ -174,17 +177,11 @@ classdef BoardPlot < handle
         % Amplifier data for plotting        
         Amplifiers
         
-        
-        
         % Offsets for the various amplifiers, for plotting        
         Offsets
-        
-       
-        
+    
         SnapshotAxes
-        
         SnapshotLines
-        
 
         
         % Spectre plot axes (Axes type) Jingyuan
@@ -204,7 +201,6 @@ classdef BoardPlot < handle
         gamma_distributionLines
         ratio_distributionAxes
         ratio_distributionLines
-        
         
         meanDeltaAxes
         meanDeltaLines
@@ -308,15 +304,18 @@ classdef BoardPlot < handle
             obj.nbrptaft=ceil(obj.durationaft*obj.ptperdb/obj.durationdb);
             
             obj.meanDelta=zeros(2,obj.nbrptbf+obj.nbrptaft+1);
+            
             %% Stimulate during specific sleepstage
-            obj.stimulateDuringNREM=false;
-            obj.stimulateDuringREM=false;
-            obj.stimulateDuringWake=false;
-            obj.stimulateAtRandom=false;
+            obj.stimulateDuringNREM = false;
+            obj.stimulateDuringREM = false;
+            obj.stimulateDuringWake = false;
+            obj.stimulateDuringWakeTheta = false;
+            obj.stimulateAtRandom = false;
+            
             
             %% Save index of the start and end of the detected delta wave => used for display in snapshot
-            obj.saveIndexStartDelta=0;
-            obj.saveIndexEndDelta=0;
+            obj.saveIndexStartDelta = 0;
+            obj.saveIndexEndDelta = 0;
             
             
             % Channels are offset, so they're not all on top of each other

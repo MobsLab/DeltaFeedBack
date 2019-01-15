@@ -1,4 +1,5 @@
-clear all 
+clear 
+
 %% Init
 Freq=20000; %Hz
 latence=4; %s

@@ -133,8 +133,8 @@ set(handles.filter_order_edit,'Enable','off');
 set(handles.filter_fmax_edit,'Enable','off');
 set(handles.pushbutton_apply_filter,'Enable','off');
 set(handles.checkbox11,'Enable','off');
-handles.filter_order=str2num(get(handles.filter_order_edit,'String'));
-handles.filter_fmax=str2num(get(handles.filter_fmax_edit,'String'));
+handles.filter_order = str2num(get(handles.filter_order_edit,'String'));
+handles.filter_fmax = str2num(get(handles.filter_fmax_edit,'String'));
 
 set(handles.edit11,'Enable','off');
 set(handles.edit13,'Enable','off');
@@ -1547,9 +1547,6 @@ if(handles.boardUI.Plot.stimulateDuringREM== false)
 else 
     handles.boardUI.Plot.stimulateDuringREM= false;
 end
-
-
-
 % Hint: get(hObject,'Value') returns toggle state of stimulateDuringREM
 
 
@@ -1563,8 +1560,18 @@ if(handles.boardUI.Plot.stimulateDuringWake== false)
 else 
     handles.boardUI.Plot.stimulateDuringWake= false;
 end
+% Hint: get(hObject,'Value') returns toggle state of stimulateDuringWake
 
-
+% --- Executes on button press in stimulateDuringWakeTheta.
+function stimulateDuringWakeTheta_Callback(hObject, eventdata, handles)
+% hObject    handle to stimulateDuringWake (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if(handles.boardUI.Plot.stimulateDuringWakeTheta== false)
+    handles.boardUI.Plot.stimulateDuringWakeTheta= true;
+else 
+    handles.boardUI.Plot.stimulateDuringWakeTheta= false;
+end
 % Hint: get(hObject,'Value') returns toggle state of stimulateDuringWake
 
 
